@@ -43,7 +43,7 @@ namespace soralog {
     template <typename ThreadInfoType, typename Format, typename... Args>
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init,hicpp-member-init)
     Event(std::string_view name, ThreadInfoType thread_info_type, Level level,
-          const Format &format, size_t max_message_length, const Args &...args)
+          const Format &format, size_t max_message_length, Args &&...args)
         : timestamp_(std::chrono::system_clock::now()), level_(level) {
       switch (thread_info_type) {
         case ThreadInfoType::NAME:
@@ -59,7 +59,7 @@ namespace soralog {
 
       try {
         message_size_ =
-            fmt::format_to_n(message_data_, max_message_length, format, args...)
+            fmt::format_to_n(message_data_, max_message_length, format, std::forward<Args>(args)...)
                 .size;
       } catch (const std::exception &exception) {
         message_size_ = fmt::format_to_n(message_data_, max_message_length,

@@ -82,11 +82,11 @@ namespace soralog {
      */
     template <typename Format, typename... Args>
     void push(std::string_view name, Level level, const Format &format,
-              const Args &...args) noexcept(IF_RELEASE) {
+              Args &&...args) noexcept(IF_RELEASE) {
       if (underlying_sinks_.empty()) {
         while (true) {
           auto node = events_.put(name, thread_info_type_, level, format,
-                                  max_message_length_, args...);
+                                  max_message_length_, std::forward<Args>(args)...);
 
           // Event is queued successfully
           if (node) {
@@ -106,7 +106,7 @@ namespace soralog {
         }
       } else {
         for (const auto &sink : underlying_sinks_) {
-          sink->push(name, level, format, args...);
+          sink->push(name, level, format, std::forward<Args>(args)...);
         }
       }
     }

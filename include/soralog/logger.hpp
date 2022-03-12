@@ -39,9 +39,9 @@ namespace soralog {
      * name and event's data ({@param format} and {@param args}) to sink
      */
     template <typename Format, typename... Args>
-    void push(Level level, const Format &format, const Args &...args) {
+    void push(Level level, const Format &format, Args &&...args) {
       if (level_ >= level) {
-        sink_->push(name_, level, format, args...);
+        sink_->push(name_, level, format, std::forward<Args>(args)...);
         if (level_ >= Level::CRITICAL) {
           sink_->flush();
         }
@@ -61,16 +61,16 @@ namespace soralog {
      * with provoded {@param level}
      */
     template <typename Format, typename... Args>
-    void log(Level level, Format &&format, const Args &...args) {
-      push(level, std::forward<Format>(format), args...);
+    void log(Level level, Format &&format, Args &&...args) {
+      push(level, std::forward<Format>(format), std::forward<Args>(args)...);
     }
 
     /**
      * Logs event ({@param format} and {@param args}) with trace level
      */
     template <typename... Args>
-    void trace(std::string_view format, const Args &...args) {
-      push(Level::TRACE, format, args...);
+    void trace(std::string_view format, Args &&...args) {
+      push(Level::TRACE, format, std::forward<Args>(args)...);
     }
 
     /**

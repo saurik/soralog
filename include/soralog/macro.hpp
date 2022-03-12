@@ -27,7 +27,7 @@ namespace soralog::macro {
   inline void proxy(const std::shared_ptr<Logger> &log, soralog::Level level,
                     Format &&fmt, Args &&...args) {
     if (log->level() >= level) {
-      log->log(level, std::forward<Format>(fmt), std::move(args)()...);
+      log->log(level, std::forward<Format>(fmt), std::forward<Args>(args)()...);
     }
   }
 }  // namespace soralog::macro

@@ -37,8 +37,8 @@ namespace soralog {
 
       template <typename... Args>
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init,hicpp-member-init)
-      explicit Node(const Args &...args) noexcept(IF_RELEASE) {
-        new (data_.data()) T(args...);
+      explicit Node(Args &&...args) noexcept(IF_RELEASE) {
+        new (data_.data()) T(std::forward<Args>(args)...);
         ready.store(false, std::memory_order_release);
       }
 
@@ -127,7 +127,7 @@ namespace soralog {
     }
 
     template <typename... Args>
-    [[nodiscard]] NodeRef put(const Args &...args) noexcept(IF_RELEASE) {
+    [[nodiscard]] NodeRef put(Args &&...args) noexcept(IF_RELEASE) {
       while (true) {
         auto push_index = push_index_.load(std::memory_order_acquire);
         auto next_index = (push_index + 1) % capacity_;
@@ -158,7 +158,7 @@ namespace soralog {
             + (next_index - pop_index);
 
         // Emplace item
-        new (&node) Node(args...);
+        new (&node) Node(std::forward<Args>(args)...);
         return NodeRef{node, true};
       }
     }
